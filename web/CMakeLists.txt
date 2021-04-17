@@ -1,18 +1,45 @@
-#
-# The ADD_EXAMPLE macro (defined in examples/CMakeLists.txt) ensures that
-# the example is correctly built for the requested connector. It is equivalent
-# to the following two lines:
-#   ADD_EXECUTABLE(hello.wt hello.C)
-#   TARGET_LINK_LIBRARIES(hello.wt ${EXAMPLES_CONNECTOR})
-# except when the ISAPI (for Microsoft IIS) connector is used, where it will
-# build a DLL with the proper symbols exported.
-#
-WT_ADD_EXAMPLE(stacuist.com app.cc)
+find_package(Boost COMPONENTS system thread)
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+  set(libs ${libs}    ${Boost_LIBRARIES})
+endif()
 
-#
-# If you have Wt installed somehwere, you should use the
-# installed Wt header files for your own Wt projects.
-# e.g. INCLUDE_DIRECTORIES(/usr/local/include)
-# instead of the following:
-#
-INCLUDE_DIRECTORIES(${WT_SOURCE_DIR}/src)
+##  FindWt.cmake
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+FIND_PACKAGE( Wt REQUIRED )
+
+INCLUDE_DIRECTORIES( ${Wt_INCLUDE_DIR} )
+INCLUDE_DIRECTORIES(/usr/local/include/Wt)
+INCLUDE_DIRECTORIES(../)
+
+set(target stacuist.com)
+
+set(src
+  app.cc
+)
+
+add_executable(${target} ${src})
+
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+  target_link_libraries(${target}
+  ${libs}
+
+  absl::strings
+
+  wt
+  wtfcgi
+  wtdbo
+  wtdbosqlite3
+)
+else()
+  target_link_libraries(${target}
+  ${libs}
+
+  absl::strings
+
+  wt
+  wthttp
+  wtdbo
+  wtdbosqlite3
+)
+endif()
