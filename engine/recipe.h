@@ -1,24 +1,27 @@
+#ifndef ENGINE_RECIPE_H_
+#define ENGINE_RECIPE_H_
+
 #include <Wt/Dbo/Dbo.h>
 
 #include <string>
+
+#include "absl/strings/str_split.h"
 
 namespace stacuist::engine {
 
 class Recipe;
 
-class Ingredient {
+class Tag {
  public:
   std::string name;
-  float quantity;
 
   Wt::Dbo::collection<Wt::Dbo::ptr<Recipe> > recipes;
 
   template <class Action>
   void persist(Action& a) {
     Wt::Dbo::field(a, name, "name");
-    Wt::Dbo::field(a, quantity, "quantity");
 
-    Wt::Dbo::hasMany(a, recipes, Wt::Dbo::ManyToMany, "recipe_ingredients");
+    Wt::Dbo::hasMany(a, recipes, Wt::Dbo::ManyToMany, "recipe_tags");
   }
 };
 
@@ -27,19 +30,25 @@ class Recipe {
   std::string name;
   std::string author;
   std::string text;
-  std::string tags;
+  std::string ingredients;
 
-  Wt::Dbo::collection<Wt::Dbo::ptr<Ingredient> > ingredients;
+  Wt::Dbo::collection<Wt::Dbo::ptr<Tag> > tags;
+
+  std::vector<std::string> GetIngredients() const {
+    return absl::StrSplit(ingredients, ";");
+  }
 
   template <class Action>
   void persist(Action& a) {
     Wt::Dbo::field(a, name, "name");
     Wt::Dbo::field(a, author, "author");
     Wt::Dbo::field(a, text, "text");
-    Wt::Dbo::field(a, tags, "tags");
+    Wt::Dbo::field(a, ingredients, "ingredients");
 
-    Wt::Dbo::hasMany(a, ingredients, Wt::Dbo::ManyToMany, "recipe_ingredients");
+    Wt::Dbo::hasMany(a, tags, Wt::Dbo::ManyToMany, "recipe_tags");
   }
 };
 
 }  // namespace stacuist::engine
+
+#endif  // ENGINE_RECIPE_H_

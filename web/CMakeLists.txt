@@ -18,6 +18,12 @@ set(src
   app.cc
 )
 
+add_library(tags tags.h tags.cc)
+
+target_link_libraries(tags
+  wtdbo
+)
+
 add_executable(${target} ${src})
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
@@ -30,6 +36,8 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
   wtfcgi
   wtdbo
   wtdbosqlite3
+
+  tags
 )
 else()
   target_link_libraries(${target}
@@ -41,5 +49,7 @@ else()
   wthttp
   wtdbo
   wtdbosqlite3
+
+  tags
 )
 endif()

@@ -9,6 +9,7 @@
 
 #include "absl/strings/str_cat.h"
 #include "engine/recipe.h"
+#include "web/tags.h"
 
 namespace stacuist::web {
 
@@ -33,12 +34,21 @@ StaCuIstApplication::StaCuIstApplication(
   Wt::WPushButton *button =
       root()->addWidget(std::make_unique<Wt::WPushButton>("Nadji"));
   root()->addWidget(std::make_unique<Wt::WBreak>());
+
+  {
+    Wt::Dbo::Transaction transaction{*session_};
+    Wt::Dbo::collection<Wt::Dbo::ptr<engine::Tag>> tags =
+        session_->find<engine::Tag>();
+    std::cout << "ZAJSSSSSS tag " << tags.size();
+    root()->addWidget(std::make_unique<TagsWidget>(tags));
+  }
+
   greeting_ = root()->addWidget(std::make_unique<Wt::WText>());
 
   auto greet = [this] {
     std::string text = "nema taj riceta";
     Wt::Dbo::Transaction transaction{*session_};
-    typedef Wt::Dbo::collection<Wt::Dbo::ptr<engine::Recipe> > Recipes;
+    typedef Wt::Dbo::collection<Wt::Dbo::ptr<engine::Recipe>> Recipes;
     Recipes recipes = session_->find<engine::Recipe>()
                           .where("name = ?")
                           .bind(nameEdit_->text().toUTF8());
