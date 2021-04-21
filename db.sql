@@ -9,10 +9,11 @@ create table recipe (
 
 create table tag (
   id integer primary key autoincrement,
+  version integer not null,
   name text not null
 );
 
-create table recipe_tag (
+create table recipe_tags (
   recipe_id integer not null,
   tag_id integer not null,
   primary key (recipe_id, tag_id),
@@ -20,5 +21,5 @@ create table recipe_tag (
   constraint fk_tag foreign key (tag_id) references tag (id) on delete cascade deferrable initially deferred
 );
 
-create index recipe_tag_recipe on recipe_tag (recipe_id);
-create index recipe_tag_tag on recipe_tag (tag_id);
+create index recipe_tags_recipe on recipe_tags (recipe_id);
+create index recipe_tags_tag on recipe_tags (tag_id);

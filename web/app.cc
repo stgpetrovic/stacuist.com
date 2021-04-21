@@ -6,6 +6,7 @@
 #include <Wt/WLineEdit.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WText.h>
+#include <glog/logging.h>
 
 #include "absl/strings/str_cat.h"
 #include "engine/recipe.h"
@@ -19,8 +20,7 @@ class StaCuIstApplication : public Wt::WApplication {
                       std::unique_ptr<Wt::Dbo::Session> session);
 
  private:
-  Wt::WLineEdit *nameEdit_;
-  Wt::WText *greeting_;
+  Wt::WText *recipe_text_;
   std::unique_ptr<Wt::Dbo::Session> session_;
 };
 
@@ -29,49 +29,33 @@ StaCuIstApplication::StaCuIstApplication(
     : Wt::WApplication(env), session_(std::move(session)) {
   setTitle("Šta ću ist?!");
 
-  root()->addWidget(std::make_unique<Wt::WText>("Sta bi jia?"));
-  nameEdit_ = root()->addWidget(std::make_unique<Wt::WLineEdit>());
-  Wt::WPushButton *button =
-      root()->addWidget(std::make_unique<Wt::WPushButton>("Nadji"));
-  root()->addWidget(std::make_unique<Wt::WBreak>());
-
   {
     Wt::Dbo::Transaction transaction{*session_};
     Wt::Dbo::collection<Wt::Dbo::ptr<engine::Tag>> tags =
         session_->find<engine::Tag>();
-    std::cout << "ZAJSSSSSS tag " << tags.size();
     root()->addWidget(std::make_unique<TagsWidget>(tags));
   }
 
-  greeting_ = root()->addWidget(std::make_unique<Wt::WText>());
+  root()->addWidget(std::make_unique<Wt::WText>("Sta bi jia?"));
+  Wt::WPushButton *button =
+      root()->addWidget(std::make_unique<Wt::WPushButton>("Nadji"));
+  root()->addWidget(std::make_unique<Wt::WBreak>());
 
-  auto greet = [this] {
-    std::string text = "nema taj riceta";
-    Wt::Dbo::Transaction transaction{*session_};
-    typedef Wt::Dbo::collection<Wt::Dbo::ptr<engine::Recipe>> Recipes;
-    Recipes recipes = session_->find<engine::Recipe>()
-                          .where("name = ?")
-                          .bind(nameEdit_->text().toUTF8());
-    if (recipes.size() > 0) {
-      for (const auto &recipe : recipes) {
-        text = absl::StrCat(recipe->name, "(", recipe->author,
-                            "): ", recipe->text);
-        break;
-      }
-    }
-    greeting_->setText(text);
-  };
-  button->clicked().connect(greet);
+  recipe_text_ = root()->addWidget(std::make_unique<Wt::WText>());
 }
+
 };  // namespace stacuist::web
 
 int main(int argc, char **argv) {
+  google::InitGoogleLogging(argv[0]);
+
   return Wt::WRun(argc, argv, [](const Wt::WEnvironment &env) {
     std::unique_ptr<Wt::Dbo::backend::Sqlite3> sqlite3{
         new Wt::Dbo::backend::Sqlite3("/home/slon/recipes.db")};
     auto session = std::make_unique<Wt::Dbo::Session>();
     session->setConnection(std::move(sqlite3));
 
+    session->mapClass<stacuist::engine::Tag>("tag");
     session->mapClass<stacuist::engine::Recipe>("recipe");
 
     return std::make_unique<stacuist::web::StaCuIstApplication>(

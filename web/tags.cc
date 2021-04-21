@@ -10,16 +10,14 @@ namespace stacuist::web {
 
 TagsWidget::TagsWidget(
     const Wt::Dbo::collection<Wt::Dbo::ptr<engine::Tag>>& tags) {
-  auto container = Wt::cpp14::make_unique<Wt::WContainerWidget>();
-
-  Wt::WSelectionBox* sb = container->addNew<Wt::WSelectionBox>();
+  Wt::WSelectionBox* sb = addNew<Wt::WSelectionBox>();
   for (const auto& tag : tags) {
     sb->addItem(tag->name);
   }
   sb->setSelectionMode(Wt::SelectionMode::Extended);
   sb->setMargin(10, Wt::Side::Right);
 
-  Wt::WText* out = container->addNew<Wt::WText>();
+  Wt::WText* out = addNew<Wt::WText>();
 
   sb->activated().connect([=] {
     Wt::WString selected;

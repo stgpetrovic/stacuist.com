@@ -4,6 +4,8 @@ if(Boost_FOUND)
   set(libs ${libs}    ${Boost_LIBRARIES})
 endif()
 
+find_package (glog 0.5.0 REQUIRED)
+
 ##  FindWt.cmake
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 FIND_PACKAGE( Wt REQUIRED )
@@ -32,6 +34,8 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
   absl::strings
 
+  glog::glog
+
   wt
   wtfcgi
   wtdbo
@@ -44,6 +48,8 @@ else()
   ${libs}
 
   absl::strings
+
+  glog::glog
 
   wt
   wthttp
