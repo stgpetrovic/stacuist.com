@@ -9,9 +9,9 @@
 #include <glog/logging.h>
 
 #include "absl/algorithm/container.h"
-#include "absl/random/random.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "absl/types/span.h"
 #include "engine/recipe.h"
 #include "web/tags.h"
 
@@ -24,24 +24,36 @@ class StaCuIstApplication : public Wt::WApplication {
   StaCuIstApplication(const Wt::WEnvironment &env,
                       std::unique_ptr<Wt::Dbo::Session> session);
 
-  std::string GetRecipe(const std::vector<std::string> &tags);
+  std::string GetRecipe(absl::Span<const std::string> tags);
 
  private:
   Wt::WText *recipe_text_;
   std::unique_ptr<Wt::Dbo::Session> session_;
 };
 
-std::string StaCuIstApplication::GetRecipe(
-    const std::vector<std::string> &tags) {
+std::string StaCuIstApplication::GetRecipe(absl::Span<const std::string> tags) {
+  VLOG(1) << "Finding recipes for " << absl::StrJoin(tags, ", ");
   Wt::Dbo::Transaction transaction{*session_};
+  std::string matcher = "1=1";
+  if (!tags.empty()) {
+    matcher = "";
+    for (const auto &tag : tags) {
+      if (!matcher.empty()) {
+        matcher += " and ";
+      }
+      matcher += absl::StrCat("t.name like '", tag, "'");
+    }
+  }
   Wt::Dbo::collection<RecipeInfo> recipe =
       session_
-          ->query<RecipeInfo>(
+          ->query<RecipeInfo>(absl::StrCat(
               "select r.name, r.text, r.ingredients from recipe r where id in "
               "( "
               "select r.id from "
               "recipe r join recipe_tags rt on "
-              "r.id = rt.recipe_id join tag t on t.id = rt.tag_id)")
+              "r.id = rt.recipe_id join tag t on t.id = rt.tag_id "
+              "where ",
+              matcher, ")"))
           .limit(1)
           .orderBy("random()")
           .resultList();
@@ -61,7 +73,10 @@ StaCuIstApplication::StaCuIstApplication(
     Wt::Dbo::Transaction transaction{*session_};
     Wt::Dbo::collection<Wt::Dbo::ptr<engine::Tag>> tags =
         session_->find<engine::Tag>();
-    root()->addWidget(std::make_unique<TagsWidget>(tags));
+    root()->addWidget(std::make_unique<TagsWidget>(
+        tags, [this](absl::Span<const std::string> tags) {
+          recipe_text_->setText(GetRecipe(tags));
+        }));
   }
 
   root()->addWidget(std::make_unique<Wt::WBreak>());
