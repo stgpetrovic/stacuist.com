@@ -33,6 +33,8 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
   ${libs}
 
   absl::strings
+  absl::random_random
+  absl::algorithm
 
   glog::glog
 
@@ -48,6 +50,8 @@ else()
   ${libs}
 
   absl::strings
+  absl::random_random
+  absl::algorithm
 
   glog::glog
 

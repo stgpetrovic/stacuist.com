@@ -8,21 +8,49 @@
 #include <Wt/WText.h>
 #include <glog/logging.h>
 
+#include "absl/algorithm/container.h"
+#include "absl/random/random.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "engine/recipe.h"
 #include "web/tags.h"
 
 namespace stacuist::web {
+
+using RecipeInfo = std::tuple<std::string, std::string, std::string>;
 
 class StaCuIstApplication : public Wt::WApplication {
  public:
   StaCuIstApplication(const Wt::WEnvironment &env,
                       std::unique_ptr<Wt::Dbo::Session> session);
 
+  std::string GetRecipe(const std::vector<std::string> &tags);
+
  private:
   Wt::WText *recipe_text_;
   std::unique_ptr<Wt::Dbo::Session> session_;
 };
+
+std::string StaCuIstApplication::GetRecipe(
+    const std::vector<std::string> &tags) {
+  Wt::Dbo::Transaction transaction{*session_};
+  Wt::Dbo::collection<RecipeInfo> recipe =
+      session_
+          ->query<RecipeInfo>(
+              "select r.name, r.text, r.ingredients from recipe r where id in "
+              "( "
+              "select r.id from "
+              "recipe r join recipe_tags rt on "
+              "r.id = rt.recipe_id join tag t on t.id = rt.tag_id)")
+          .limit(1)
+          .orderBy("random()")
+          .resultList();
+  if (recipe.size() > 0) {
+    auto it = *recipe.begin();
+    return absl::StrCat(std::get<0>(it), ":", std::get<1>(it));
+  }
+  return "< no recipe found >";
+}
 
 StaCuIstApplication::StaCuIstApplication(
     const Wt::WEnvironment &env, std::unique_ptr<Wt::Dbo::Session> session)
@@ -36,12 +64,10 @@ StaCuIstApplication::StaCuIstApplication(
     root()->addWidget(std::make_unique<TagsWidget>(tags));
   }
 
-  root()->addWidget(std::make_unique<Wt::WText>("Sta bi jia?"));
-  Wt::WPushButton *button =
-      root()->addWidget(std::make_unique<Wt::WPushButton>("Nadji"));
   root()->addWidget(std::make_unique<Wt::WBreak>());
 
   recipe_text_ = root()->addWidget(std::make_unique<Wt::WText>());
+  recipe_text_->setText(GetRecipe({"vegan"}));
 }
 
 };  // namespace stacuist::web
