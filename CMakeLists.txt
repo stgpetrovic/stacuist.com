@@ -23,3 +23,4 @@ endif()
 
 add_subdirectory(engine)
 add_subdirectory(web)
+add_subdirectory(db)
