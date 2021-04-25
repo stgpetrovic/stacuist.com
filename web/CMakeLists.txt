@@ -22,6 +22,7 @@ set(src
 
 add_library(tags tags.h tags.cc)
 add_library(recipe_view recipe_view.h recipe_view.cc)
+add_library(query query.h query.cc)
 
 target_link_libraries(tags
   wtdbo
@@ -36,6 +37,9 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
   absl::strings
   absl::random_random
   absl::algorithm
+  absl::flags
+  absl::flags_parse
+  absl::statusor
 
   glog::glog
 
@@ -46,6 +50,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
   tags
   recipe_view
+  query
 )
 else()
   target_link_libraries(${target}
@@ -54,6 +59,9 @@ else()
   absl::strings
   absl::random_random
   absl::algorithm
+  absl::flags
+  absl::flags_parse
+  absl::statusor
 
   glog::glog
 
@@ -64,5 +72,6 @@ else()
 
   tags
   recipe_view
+  query
 )
 endif()

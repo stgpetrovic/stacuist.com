@@ -15,12 +15,15 @@ namespace stacuist::web {
 // Shows available tags and allows filtering by them.
 struct TagsWidget : public Wt::WContainerWidget {
  public:
-  TagsWidget(const Wt::Dbo::collection<Wt::Dbo::ptr<engine::Tag>>& tags,
+  TagsWidget(absl::Span<const std::string> tags,
              std::function<void(absl::Span<const std::string>)>
                  selection_change_callback);
 
+  std::vector<std::string> selected_tags() { return selected_tags_; }
+
  private:
   Wt::Signal<absl::Span<const std::string>> tag_selection_changed_;
+  std::vector<std::string> selected_tags_;
 };
 
 }  // namespace stacuist::web

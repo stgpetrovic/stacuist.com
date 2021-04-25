@@ -15,9 +15,10 @@ namespace stacuist::web {
 // Shows the recipe.
 struct RecipeView : public Wt::WContainerWidget {
  public:
-  RecipeView(const engine::Recipe& recipe);
+  RecipeView();
 
   void SetRecipe(const engine::Recipe& recipe);
+  void SetError(const std::string& error);
 
  private:
   engine::Recipe recipe_;

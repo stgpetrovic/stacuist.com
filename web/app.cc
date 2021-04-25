@@ -9,6 +9,8 @@
 #include <glog/logging.h>
 
 #include "absl/algorithm/container.h"
+#include "absl/flags/flag.h"
+#include "absl/flags/parse.h"
 #include "absl/strings/match.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
@@ -16,39 +18,56 @@
 #include "absl/strings/strip.h"
 #include "absl/types/span.h"
 #include "engine/recipe.h"
+#include "web/query.h"
 #include "web/recipe_view.h"
 #include "web/tags.h"
+
+ABSL_FLAG(std::string, db_path, "", "path to the sqlite3 database");
 
 namespace stacuist::web {
 
 namespace {
 constexpr absl::string_view kRecipe = "/recipe/";
-}
+}  // namespace
 
 class StaCuIstApplication : public Wt::WApplication {
  public:
   StaCuIstApplication(const Wt::WEnvironment &env,
                       std::unique_ptr<Wt::Dbo::Session> session);
 
-  engine::Recipe GetRecipe(absl::Span<const std::string> tags);
-
  private:
   void ProcessPath(absl::string_view path);
+  void SetRecipe(const absl::StatusOr<engine::Recipe> &recipe);
+
+  TagsWidget *tags_view_;
   RecipeView *recipe_view_;
   std::unique_ptr<Wt::Dbo::Session> session_;
 };
+
+void StaCuIstApplication::SetRecipe(
+    const absl::StatusOr<engine::Recipe> &recipe) {
+  LOG(INFO) << "Setting recipe, success = " << recipe.ok();
+  if (!recipe.ok()) {
+    LOG(WARNING) << "Failed loading recipe...";
+    recipe_view_->SetError(std::string(recipe.status().message()));
+    return;
+  }
+  recipe_view_->SetRecipe(*recipe);
+  setInternalPath(absl::StrCat(kRecipe, recipe->id));
+}
 
 void StaCuIstApplication::ProcessPath(absl::string_view path) {
   if (!absl::StartsWith(path, kRecipe)) {
     return;
   }
+
   LOG(WARNING) << "\t--- Processing URL: " << path;
   absl::string_view p(path);
   absl::ConsumePrefix(&p, kRecipe);
   int32_t recipe_id;
   if (!absl::SimpleAtoi(p, &recipe_id)) {
     LOG(WARNING) << "Failed to parse URL to recipe id: " << path;
-    recipe_view_->SetRecipe(GetRecipe({}));
+    SetRecipe(GetRecipe({}, session_.get()));
     return;
   }
 
@@ -57,44 +76,10 @@ void StaCuIstApplication::ProcessPath(absl::string_view path) {
       session_->find<engine::Recipe>().where("id = ?").bind(recipe_id);
   if (!recipe) {
     LOG(WARNING) << "Unknown recipe id " << recipe_id;
-    recipe_view_->SetRecipe(GetRecipe({}));
+    recipe_view_->SetError(absl::StrCat("unknown recipe id: ", recipe_id));
     return;
   }
-  recipe_view_->SetRecipe(*recipe);
-}
-
-engine::Recipe StaCuIstApplication::GetRecipe(
-    absl::Span<const std::string> tags) {
-  LOG(INFO) << "\t--- Finding recipes for " << absl::StrJoin(tags, ", ");
-  Wt::Dbo::Transaction transaction{*session_};
-  std::string matcher = "1=1";
-  if (!tags.empty()) {
-    matcher = "";
-    for (const auto &tag : tags) {
-      if (!matcher.empty()) {
-        matcher += " and ";
-      }
-      matcher += absl::StrCat("t.name like '", tag, "'");
-    }
-  }
-  Wt::Dbo::collection<engine::RecipeInfo> recipe =
-      session_
-          ->query<engine::RecipeInfo>(absl::StrCat(
-              "select r.id, r.name, r.author, r.text, r.ingredients from "
-              "recipe r where id in "
-              "( "
-              "select r.id from "
-              "recipe r join recipe_tags rt on "
-              "r.id = rt.recipe_id join tag t on t.id = rt.tag_id "
-              "where ",
-              matcher, ")"))
-          .limit(1)
-          .orderBy("random()")
-          .resultList();
-  if (recipe.size() > 0) {
-    return engine::Recipe(*(recipe.begin()));
-  }
-  return engine::Recipe();
+  SetRecipe(*recipe);
 }
 
 StaCuIstApplication::StaCuIstApplication(
@@ -102,23 +87,36 @@ StaCuIstApplication::StaCuIstApplication(
     : Wt::WApplication(env), session_(std::move(session)) {
   setTitle("Šta ću ist?!");
 
+  std::vector<std::string> tag_names;
   {
     Wt::Dbo::Transaction transaction{*session_};
     Wt::Dbo::collection<Wt::Dbo::ptr<engine::Tag>> tags =
         session_->find<engine::Tag>();
-    root()->addWidget(std::make_unique<TagsWidget>(
-        tags, [this](absl::Span<const std::string> tags) {
-          recipe_view_->SetRecipe(GetRecipe(tags));
+    for (const auto &tag : tags) {
+      tag_names.push_back(tag->name);
+    }
+    tags_view_ = root()->addWidget(std::make_unique<TagsWidget>(
+        tag_names, [this](absl::Span<const std::string> tags) {
+          SetRecipe(GetRecipe(tags, session_.get()));
         }));
   }
 
   root()->addWidget(std::make_unique<Wt::WBreak>());
 
-  recipe_view_ = root()->addWidget(std::make_unique<RecipeView>(GetRecipe({})));
+  // Button for reloading the recipe using the same filters.
+  auto reload_button =
+      root()->addWidget(std::make_unique<Wt::WPushButton>("Neću to"));
+  reload_button->clicked().connect([this] {
+    SetRecipe(GetRecipe(tags_view_->selected_tags(), session_.get()));
+  });
+
+  recipe_view_ = root()->addWidget(std::make_unique<RecipeView>());
 
   // Reconstruct the state from URL.
   if (internalPath() != "/") {
     ProcessPath(internalPath());
+  } else {
+    SetRecipe(GetRecipe({}, session_.get()));
   }
 }
 
@@ -126,10 +124,12 @@ StaCuIstApplication::StaCuIstApplication(
 
 int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
+  absl::ParseCommandLine(argc, argv);
 
   return Wt::WRun(argc, argv, [](const Wt::WEnvironment &env) {
+    LOG(INFO) << "Loading databse: " << absl::GetFlag(FLAGS_db_path);
     std::unique_ptr<Wt::Dbo::backend::Sqlite3> sqlite3{
-        new Wt::Dbo::backend::Sqlite3("/home/slon/recipes.db")};
+        new Wt::Dbo::backend::Sqlite3(absl::GetFlag(FLAGS_db_path))};
     auto session = std::make_unique<Wt::Dbo::Session>();
     session->setConnection(std::move(sqlite3));
 

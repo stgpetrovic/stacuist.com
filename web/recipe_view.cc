@@ -9,14 +9,13 @@
 
 namespace stacuist::web {
 
-RecipeView::RecipeView(const engine::Recipe& recipe) {
-  text_ = addNew<Wt::WText>();
-  SetRecipe(recipe_);
-}
+RecipeView::RecipeView() { text_ = addNew<Wt::WText>(); }
 
 void RecipeView::SetRecipe(const engine::Recipe& recipe) {
   recipe_ = recipe;
   text_->setText(recipe_.text);
 }
+
+void RecipeView::SetError(const std::string& error) { text_->setText(error); }
 
 }  // namespace stacuist::web
