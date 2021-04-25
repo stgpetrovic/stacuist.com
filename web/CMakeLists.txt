@@ -21,6 +21,7 @@ set(src
 )
 
 add_library(tags tags.h tags.cc)
+add_library(recipe_view recipe_view.h recipe_view.cc)
 
 target_link_libraries(tags
   wtdbo
@@ -44,6 +45,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
   wtdbosqlite3
 
   tags
+  recipe_view
 )
 else()
   target_link_libraries(${target}
@@ -61,5 +63,6 @@ else()
   wtdbosqlite3
 
   tags
+  recipe_view
 )
 endif()

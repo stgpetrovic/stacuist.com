@@ -9,6 +9,10 @@
 
 namespace stacuist::engine {
 
+// For complex SQL querying.
+using RecipeInfo =
+    std::tuple<int32_t, std::string, std::string, std::string, std::string>;
+
 class Recipe;
 
 class Tag {
@@ -27,10 +31,21 @@ class Tag {
 
 class Recipe {
  public:
+  int32_t id;
   std::string name;
   std::string author;
   std::string text;
   std::string ingredients;
+
+  Recipe() = default;
+
+  Recipe(const RecipeInfo& recipe_info) {
+    id = std::get<0>(recipe_info);
+    name = std::get<1>(recipe_info);
+    author = std::get<2>(recipe_info);
+    text = std::get<3>(recipe_info);
+    ingredients = std::get<4>(recipe_info);
+  }
 
   Wt::Dbo::collection<Wt::Dbo::ptr<Tag> > tags;
 
@@ -40,6 +55,7 @@ class Recipe {
 
   template <class Action>
   void persist(Action& a) {
+    Wt::Dbo::field(a, id, "id");
     Wt::Dbo::field(a, name, "name");
     Wt::Dbo::field(a, author, "author");
     Wt::Dbo::field(a, text, "text");
