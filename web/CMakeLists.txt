@@ -30,48 +30,31 @@ target_link_libraries(tags
 
 add_executable(${target} ${src})
 
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-  target_link_libraries(${target}
+# Deploy on fastcgi in release, and local httpd in debug mode.
+set (wt_deploy_lib
+  debug wthttp
+  optimized wtfastcgi)
+
+target_link_libraries(${target}
   ${libs}
 
+  # External libraries.
   absl::strings
   absl::random_random
   absl::algorithm
   absl::flags
   absl::flags_parse
   absl::statusor
-
   glog::glog
 
+  # Wt libraries.
   wt
-  wtfcgi
   wtdbo
   wtdbosqlite3
+  ${wt_deploy_lib}
 
+  # Internal libraries.
   tags
   recipe_view
   query
 )
-else()
-  target_link_libraries(${target}
-  ${libs}
-
-  absl::strings
-  absl::random_random
-  absl::algorithm
-  absl::flags
-  absl::flags_parse
-  absl::statusor
-
-  glog::glog
-
-  wt
-  wthttp
-  wtdbo
-  wtdbosqlite3
-
-  tags
-  recipe_view
-  query
-)
-endif()

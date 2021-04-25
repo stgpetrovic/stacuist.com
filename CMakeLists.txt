@@ -3,6 +3,7 @@ project (stacuist.com CXX)
 
 set(CMAKE_CXX_STANDARD   14)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wc++17-extensions")
 
 set(ABSL_CXX_STANDARD "${CMAKE_CXX_STANDARD}")
 
@@ -19,16 +20,6 @@ if (NOT CMAKE_BUILD_TYPE)
 else()
   message("==> CMAKE_BUILD_TYPE == ${CMAKE_BUILD_TYPE}.")
 endif()
-
-
-###########
-# Warnings
-###########
-if (CMAKE_COMPILER_IS_GNUCC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -Wno-unused-variable") # suppress
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")              # suppress
-endif ()
 
 add_subdirectory(engine)
 add_subdirectory(web)
