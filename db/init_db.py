@@ -15,5 +15,4 @@ if __name__ == '__main__':
     sql += recipes_to_sql.ToSql(recipes_to_sql.ParseRecipes())
     p = Popen(["sqlite3", sys.argv[1]], stdout=PIPE, stdin=PIPE, stderr=STDOUT)   
     out = p.communicate(input=bytes(sql, "utf8"))
-    print(sys.argv[1])
     print(out)
