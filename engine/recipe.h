@@ -50,7 +50,7 @@ class Recipe {
   Wt::Dbo::collection<Wt::Dbo::ptr<Tag> > tags;
 
   std::vector<std::string> GetIngredients() const {
-    return absl::StrSplit(ingredients, ";");
+    return absl::StrSplit(ingredients, "|");
   }
 
   template <class Action>

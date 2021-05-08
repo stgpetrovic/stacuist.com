@@ -52,7 +52,7 @@ def ToSql(recipes):
         sql.append('insert into tag values(%d, 0, "%s")' % (key, tag))
 
     for key, recipe in enumerate(recipes):
-        sql.append('insert into recipe values(%d, 0, "%s", "slon", "%s", "%s")' % (key, recipe.name, '\n'.join(recipe.text), ','.join(recipe.tags)))
+        sql.append('insert into recipe values(%d, 0, "%s", "slon", "%s", "%s")' % (key, recipe.name, '\n'.join(recipe.text), '|'.join(recipe.ingredients)))
         for tag in recipe.tags:
             sql.append('insert into recipe_tags values(%s, %d)' % (key, tags[tag]))
 

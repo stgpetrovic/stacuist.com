@@ -21,6 +21,9 @@ else()
   message("==> CMAKE_BUILD_TYPE == ${CMAKE_BUILD_TYPE}.")
 endif()
 
+FILE(COPY resources
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
 add_subdirectory(engine)
 add_subdirectory(web)
 add_subdirectory(db)

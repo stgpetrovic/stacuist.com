@@ -85,6 +85,8 @@ void StaCuIstApplication::ProcessPath(absl::string_view path) {
 StaCuIstApplication::StaCuIstApplication(
     const Wt::WEnvironment &env, std::unique_ptr<Wt::Dbo::Session> session)
     : Wt::WApplication(env), session_(std::move(session)) {
+  // Add an external style sheet to the application.
+  Wt::WApplication::instance()->useStyleSheet("style/main.css");
   setTitle("Šta ću ist?!");
 
   std::vector<std::string> tag_names;

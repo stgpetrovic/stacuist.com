@@ -23,6 +23,8 @@ struct RecipeView : public Wt::WContainerWidget {
  private:
   engine::Recipe recipe_;
   Wt::WText* text_;
+  Wt::WText* title_;
+  Wt::WContainerWidget* ingredients_;
 };
 
 }  // namespace stacuist::web
