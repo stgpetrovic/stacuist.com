@@ -1,6 +1,7 @@
 #include <Wt/Dbo/Dbo.h>
 #include <Wt/Dbo/backend/Sqlite3.h>
 #include <Wt/WApplication.h>
+#include <Wt/WBootstrapTheme.h>
 #include <Wt/WBreak.h>
 #include <Wt/WContainerWidget.h>
 #include <Wt/WLineEdit.h>
@@ -85,8 +86,16 @@ void StaCuIstApplication::ProcessPath(absl::string_view path) {
 StaCuIstApplication::StaCuIstApplication(
     const Wt::WEnvironment &env, std::unique_ptr<Wt::Dbo::Session> session)
     : Wt::WApplication(env), session_(std::move(session)) {
+  // Set the theme.
+  auto theme = std::make_shared<Wt::WBootstrapTheme>();
+  theme->setVersion(Wt::BootstrapVersion::v3);
+  theme->setResponsive(true);
+  setTheme(theme);
+
   // Add an external style sheet to the application.
   Wt::WApplication::instance()->useStyleSheet("style/main.css");
+
+  // Set up the app.
   setTitle("Šta ću ist?!");
 
   std::vector<std::string> tag_names;

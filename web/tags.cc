@@ -13,9 +13,11 @@ TagsWidget::TagsWidget(absl::Span<const std::string> tags,
                        std::function<void(absl::Span<const std::string>)>
                            selection_change_callback) {
   Wt::WSelectionBox* sb = addNew<Wt::WSelectionBox>();
+
   for (const auto& tag : tags) {
     sb->addItem(tag);
   }
+
   sb->setSelectionMode(Wt::SelectionMode::Extended);
   sb->setMargin(10, Wt::Side::Right);
 

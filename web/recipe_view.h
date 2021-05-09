@@ -7,6 +7,7 @@
 #include <Wt/WSignal.h>
 #include <Wt/WText.h>
 
+#include "absl/random/random.h"
 #include "absl/types/span.h"
 #include "engine/recipe.h"
 
@@ -21,10 +22,14 @@ struct RecipeView : public Wt::WContainerWidget {
   void SetError(const std::string& error);
 
  private:
+  std::string RandomHint();
+
   engine::Recipe recipe_;
   Wt::WText* text_;
   Wt::WText* title_;
+  Wt::WText* hint_;
   Wt::WContainerWidget* ingredients_;
+  absl::BitGen bitgen_;
 };
 
 }  // namespace stacuist::web
