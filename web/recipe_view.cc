@@ -25,6 +25,7 @@ RecipeView::RecipeView() {
   addNew<Wt::WBreak>();
   title_ = addNew<Wt::WText>();
   addNew<Wt::WBreak>();
+  ingredients_ = addNew<Wt::WContainerWidget>();
 
   addNew<Wt::WBreak>();
 
