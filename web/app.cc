@@ -90,7 +90,6 @@ StaCuIstApplication::StaCuIstApplication(
   auto c = std::make_unique<Wt::WContainerWidget>();
   auto fit = c->setLayout(std::make_unique<Wt::WVBoxLayout>());
 
-  root()->setContentAlignment(Wt::AlignmentFlag::Center);
   // Set the theme.
   auto theme = std::make_shared<Wt::WBootstrapTheme>();
   theme->setVersion(Wt::BootstrapVersion::v3);
