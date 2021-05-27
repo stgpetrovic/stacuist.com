@@ -23,6 +23,8 @@ endif()
 
 FILE(COPY resources
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+FILE(COPY /usr/local/share/Wt/resources
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 add_subdirectory(engine)
 add_subdirectory(web)

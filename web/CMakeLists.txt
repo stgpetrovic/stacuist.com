@@ -33,7 +33,7 @@ add_executable(${target} ${src})
 # Deploy on fastcgi in release, and local httpd in debug mode.
 set (wt_deploy_lib
   debug wthttp
-  optimized wtfastcgi)
+  optimized wtfcgi)
 
 target_link_libraries(${target}
   ${libs}
