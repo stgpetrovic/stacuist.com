@@ -15,8 +15,22 @@ namespace stacuist::web {
 
 std::string RecipeView::RandomHint() {
   static const auto* const hints = new std::vector<std::string>{
-      "A sta ne bi ovo?", "Ma najlakse ovako.",
-      "Ajde probaj ovo:", "Ni ora ni kopa, a ludilo.", "Ajde baci oko na ovi:"};
+      "A sta ne bi ovo?",
+      "Ma najlakse ovako",
+      "Ajde probaj ovo",
+      "Ni ora ni kopa, a ludilo",
+      "Ajde baci oko na ovi",
+      "Lipo ti ovako",
+      "Kuvacu u ruke i ajmo",
+      "Nemas se sta mislit",
+      "Ajmo, rizi kapulu",
+      "Vidi vako",
+      "Nije sarma, al aj",
+      "Ćirni ovo",
+      "Ko se misli ostane gladan",
+      "Ajmo, dica su gladna",
+      "Samo ti pomalo",
+  };
   return hints->at(absl::Uniform(bitgen_, 0u, hints->size()));
 }
 
@@ -35,9 +49,9 @@ RecipeView::RecipeView() {
 
 void RecipeView::SetRecipe(const engine::Recipe& recipe) {
   recipe_ = recipe;
-  title_->setText(absl::StrCat("<h2>", recipe_.name, "</h2>"));
+  title_->setText(absl::StrCat("<h3>", recipe_.name, "</h3>"));
   text_->setText(absl::StrReplaceAll(recipe_.text, {{"\n", "<br/>"}}));
-  hint_->setText(RandomHint());
+  hint_->setText(absl::StrCat("<em>", RandomHint(), "</em>"));
 
   ingredients_->clear();
   for (const auto& ingredient : recipe_.GetIngredients()) {

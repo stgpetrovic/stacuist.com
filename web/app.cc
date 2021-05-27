@@ -90,6 +90,10 @@ StaCuIstApplication::StaCuIstApplication(
   auto c = std::make_unique<Wt::WContainerWidget>();
   auto fit = c->setLayout(std::make_unique<Wt::WVBoxLayout>());
 
+  // Logo.
+  auto h1 = fit->addWidget(std::make_unique<Wt::WText>());
+  h1->setText("<h1>Šta ću ist?!</h1>");
+
   // Set the theme.
   auto theme = std::make_shared<Wt::WBootstrapTheme>();
   theme->setVersion(Wt::BootstrapVersion::v3);
@@ -120,7 +124,7 @@ StaCuIstApplication::StaCuIstApplication(
 
   // Button for reloading the recipe using the same filters.
   auto reload_button =
-      fit->addWidget(std::make_unique<Wt::WPushButton>("Neću to"));
+      fit->addWidget(std::make_unique<Wt::WPushButton>("Daj nešto drugo"));
   reload_button->clicked().connect([this] {
     SetRecipe(GetRecipe(tags_view_->selected_tags(), session_.get()));
   });
