@@ -7,6 +7,7 @@
 #include <Wt/WLineEdit.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WText.h>
+#include <Wt/WVBoxLayout.h>
 #include <glog/logging.h>
 
 #include "absl/algorithm/container.h"
@@ -86,6 +87,10 @@ void StaCuIstApplication::ProcessPath(absl::string_view path) {
 StaCuIstApplication::StaCuIstApplication(
     const Wt::WEnvironment &env, std::unique_ptr<Wt::Dbo::Session> session)
     : Wt::WApplication(env), session_(std::move(session)) {
+  auto c = std::make_unique<Wt::WContainerWidget>();
+  auto fit = c->setLayout(std::make_unique<Wt::WVBoxLayout>());
+
+  root()->setContentAlignment(Wt::AlignmentFlag::Center);
   // Set the theme.
   auto theme = std::make_shared<Wt::WBootstrapTheme>();
   theme->setVersion(Wt::BootstrapVersion::v3);
@@ -106,22 +111,22 @@ StaCuIstApplication::StaCuIstApplication(
     for (const auto &tag : tags) {
       tag_names.push_back(tag->name);
     }
-    tags_view_ = root()->addWidget(std::make_unique<TagsWidget>(
+    tags_view_ = fit->addWidget(std::make_unique<TagsWidget>(
         tag_names, [this](absl::Span<const std::string> tags) {
           SetRecipe(GetRecipe(tags, session_.get()));
         }));
   }
 
-  root()->addWidget(std::make_unique<Wt::WBreak>());
+  fit->addWidget(std::make_unique<Wt::WBreak>());
 
   // Button for reloading the recipe using the same filters.
   auto reload_button =
-      root()->addWidget(std::make_unique<Wt::WPushButton>("Neću to"));
+      fit->addWidget(std::make_unique<Wt::WPushButton>("Neću to"));
   reload_button->clicked().connect([this] {
     SetRecipe(GetRecipe(tags_view_->selected_tags(), session_.get()));
   });
 
-  recipe_view_ = root()->addWidget(std::make_unique<RecipeView>());
+  recipe_view_ = fit->addWidget(std::make_unique<RecipeView>());
 
   // Reconstruct the state from URL.
   if (internalPath() != "/") {
@@ -129,6 +134,8 @@ StaCuIstApplication::StaCuIstApplication(
   } else {
     SetRecipe(GetRecipe({}, session_.get()));
   }
+
+  root()->addWidget(std::move(c));
 }
 
 };  // namespace stacuist::web
