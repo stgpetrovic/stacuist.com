@@ -8,7 +8,6 @@
 #include <Wt/WPushButton.h>
 #include <Wt/WText.h>
 #include <Wt/WVBoxLayout.h>
-#include <glog/logging.h>
 
 #include "absl/algorithm/container.h"
 #include "absl/flags/flag.h"
@@ -48,9 +47,7 @@ class StaCuIstApplication : public Wt::WApplication {
 
 void StaCuIstApplication::SetRecipe(
     const absl::StatusOr<engine::Recipe> &recipe) {
-  LOG(INFO) << "Setting recipe, success = " << recipe.ok();
   if (!recipe.ok()) {
-    LOG(WARNING) << "Failed loading recipe...";
     recipe_view_->SetError(std::string(recipe.status().message()));
     return;
   }
@@ -63,12 +60,10 @@ void StaCuIstApplication::ProcessPath(absl::string_view path) {
     return;
   }
 
-  LOG(WARNING) << "\t--- Processing URL: " << path;
   absl::string_view p(path);
   absl::ConsumePrefix(&p, kRecipe);
   int32_t recipe_id;
   if (!absl::SimpleAtoi(p, &recipe_id)) {
-    LOG(WARNING) << "Failed to parse URL to recipe id: " << path;
     SetRecipe(GetRecipe({}, session_.get()));
     return;
   }
@@ -77,7 +72,6 @@ void StaCuIstApplication::ProcessPath(absl::string_view path) {
   Wt::Dbo::ptr<engine::Recipe> recipe =
       session_->find<engine::Recipe>().where("id = ?").bind(recipe_id);
   if (!recipe) {
-    LOG(WARNING) << "Unknown recipe id " << recipe_id;
     recipe_view_->SetError(absl::StrCat("unknown recipe id: ", recipe_id));
     return;
   }
@@ -144,11 +138,9 @@ StaCuIstApplication::StaCuIstApplication(
 };  // namespace stacuist::web
 
 int main(int argc, char **argv) {
-  google::InitGoogleLogging(argv[0]);
   absl::ParseCommandLine(argc, argv);
 
   return Wt::WRun(argc, argv, [](const Wt::WEnvironment &env) {
-    LOG(INFO) << "Loading databse: " << absl::GetFlag(FLAGS_db_path);
     std::unique_ptr<Wt::Dbo::backend::Sqlite3> sqlite3{
         new Wt::Dbo::backend::Sqlite3(absl::GetFlag(FLAGS_db_path))};
     auto session = std::make_unique<Wt::Dbo::Session>();

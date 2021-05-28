@@ -1,0 +1,10 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "recipe",
+    hdrs = ["recipe.h"],
+    deps = [
+        "//:wtdbo",
+        "@com_google_absl//absl/strings",
+    ],
+)

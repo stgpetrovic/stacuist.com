@@ -5,8 +5,6 @@ if(Boost_FOUND)
   set(libs ${libs}    ${Boost_LIBRARIES})
 endif()
 
-find_package (glog 0.5.0 REQUIRED)
-
 ##  FindWt.cmake
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 FIND_PACKAGE( Wt REQUIRED )
@@ -46,7 +44,6 @@ target_link_libraries(${target}
   absl::flags
   absl::flags_parse
   absl::statusor
-  glog::glog
 
   # Wt libraries.
   wt

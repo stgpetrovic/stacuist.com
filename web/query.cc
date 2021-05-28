@@ -3,7 +3,6 @@
 
 #include <Wt/Dbo/Session.h>
 #include <absl/status/status.h>
-#include <glog/logging.h>
 
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
@@ -15,7 +14,6 @@ namespace stacuist::web {
 absl::StatusOr<engine::Recipe> GetRecipe(absl::Span<const std::string> tags,
                                          Wt::Dbo::Session* session) {
   const auto tag_string = absl::StrJoin(tags, ", ");
-  LOG(INFO) << "\t--- Finding recipes for " << tag_string;
   Wt::Dbo::Transaction transaction{*session};
   std::string matcher = "1=1";
   if (!tags.empty()) {

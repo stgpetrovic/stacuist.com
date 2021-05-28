@@ -1,0 +1,40 @@
+cc_binary(
+    name = "web",
+    srcs = ["app.cc"],
+    deps = [
+        "//:wt",
+        "//:boost_system",
+        "//:boost_thread",
+        "//:wtdbo",
+        "//:wtdbosqlite3",
+        "//engine:recipe",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/random",
+        "@com_google_absl//absl/algorithm",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/status:statusor",
+    ],
+)
+
+cc_library(
+    name = "recipe_view",
+    srcs = ["recipe_view.cc"],
+    hdrs = ["recipe_view.h"],
+    deps = [
+        "//:wt",
+        "//engine:recipe",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/random",
+    ],
+)
+
+cc_library(
+    name = "tags",
+    srcs = ["tags.cc"],
+    hdrs = ["tags.h"],
+    deps = [
+        "//:wt",
+        "//engine:recipe",
+        "@com_google_absl//absl/types:span",
+    ],
+)

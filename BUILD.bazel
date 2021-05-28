@@ -1,0 +1,68 @@
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+load("@rules_foreign_cc//tools/build_defs:boost_build.bzl", "boost_build")
+
+package(default_visibility = ["//visibility:public"])
+
+cmake(
+    name = "wt",
+    cache_entries = {
+        "CMAKE_C_FLAGS": "-fPIC",
+        },
+    lib_source = "@wt//:all_srcs",
+    out_lib_dir = "src/",
+    out_shared_libs = ["libwt.so"],
+)
+
+cmake(
+    name = "wtfcgi",
+    cache_entries = {
+        "CMAKE_C_FLAGS": "-fPIC",
+        },
+    lib_source = "@wt//:all_srcs",
+    out_lib_dir = "src/fcgi",
+    out_shared_libs = ["libwtfcgi.so"],
+)
+
+cmake(
+    name = "wtdbo",
+    cache_entries = {
+        "CMAKE_C_FLAGS": "-fPIC",
+        },
+    lib_source = "@wt//:all_srcs",
+    out_lib_dir = "src/Wt/Dbo/",
+    out_shared_libs = ["libwtdbo.so"],
+)
+
+cmake(
+    name = "wtdbosqlite3",
+    cache_entries = {
+        "CMAKE_C_FLAGS": "-fPIC",
+        },
+    lib_source = "@wt//:all_srcs",
+    out_lib_dir = "src/Wt/Dbo/backend/",
+    out_shared_libs = ["libwtdbosqlite3.so"],
+)
+
+cmake(
+    name = "wthttp",
+    cache_entries = {
+        "CMAKE_C_FLAGS": "-fPIC",
+        },
+    lib_source = "@wt//:all_srcs",
+    out_lib_dir = "src/http",
+    out_shared_libs = ["libwthttp.so"],
+)
+
+boost_build(
+    name = "boost_system",
+    lib_source = "@boost//:all",
+    static_libraries = ["libboost_system.a"],
+    user_options = ["--with-system"],
+)
+
+boost_build(
+    name = "boost_thread",
+    lib_source = "@boost//:all",
+    static_libraries = ["libboost_thread.a"],
+    user_options = ["--with-thread"],
+)
