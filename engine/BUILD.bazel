@@ -4,7 +4,7 @@ cc_library(
     name = "recipe",
     hdrs = ["recipe.h"],
     deps = [
-        "//:wtdbo",
+        "@system//:system",
         "@com_google_absl//absl/strings",
     ],
 )
