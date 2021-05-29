@@ -1,0 +1,21 @@
+package(default_visibility = ["//visibility:public"])
+
+genrule(
+    name = "gendb",
+    outs = ["recipes.db"],
+    cmd = "./$(location recipes_to_sql) | sqlite3 \"$@\"",
+    tools = ["recipes_to_sql"],
+)
+
+filegroup(
+    name="db",
+    srcs=["db.sql"]
+)
+
+py_binary(
+    name = "recipes_to_sql",
+    srcs = ["recipes_to_sql.py"],
+    data = [":db", ":recipes"],
+    python_version = "PY3",
+    deps = ["@rules_python//python/runfiles"],
+)

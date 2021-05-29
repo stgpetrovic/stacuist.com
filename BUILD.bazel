@@ -1,1 +1,13 @@
+load("@rules_pkg//:pkg.bzl", "pkg_deb", "pkg_tar")
+
 package(default_visibility = ["//visibility:public"])
+
+pkg_tar(
+    name = "stacuist_webapp",
+    srcs = [
+        ":resources",
+        ":web_resources",
+        "//web:web",
+    ],
+    package_file_name = "stacuist.com.tar",
+)

@@ -3,17 +3,24 @@
 import os
 from collections import namedtuple
 
+from rules_python.python.runfiles import runfiles
+
 Recipe = namedtuple('Recipe', ['name', 'ingredients', 'text', 'tags'])
 
 def ParseRecipes():
     recipes = []
-    for fn in os.listdir("./recipes"):
+    r = runfiles.Create()
+
+    for fn in os.listdir(r.Rlocation("stacuist/db/recipes")):
         ingredients = []
         text = []
         tags = []
         name = ""
         phase = None
-        for l in open("./recipes/"+fn).read().splitlines():
+        path = r.Rlocation("stacuist/db/recipes/recipes/"+fn)
+        if not path:
+            continue
+        for l in open(path).read().splitlines():
             if l == "Name:":
                 phase = 0
                 continue
@@ -60,5 +67,7 @@ def ToSql(recipes):
 
 
 if __name__ == '__main__':
-    print(open('db.sql').read())
-    print(ToSql(ParseRecipes()))
+    r = runfiles.Create()
+    with open(r.Rlocation("stacuist/db/db.sql"), "r") as f:
+      print(f.read())
+      print(ToSql(ParseRecipes()))
