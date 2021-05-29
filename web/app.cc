@@ -33,7 +33,10 @@ StaCuIstApplication::StaCuIstApplication(
 
   // Logo.
   auto h1 = fit->addWidget(std::make_unique<Wt::WText>());
-  h1->setText("<h1>Šta ću ist?!</h1>");
+  h1->setText(
+      "<h1>Šta ću ist?! <a "
+      "href='https://github.com/stgpetrovic/stacuist.com' "
+      "target='_blank' class='btn btn-primary'>github</a></h1>");
 
   // Set the theme.
   auto theme = std::make_shared<Wt::WBootstrapTheme>();
