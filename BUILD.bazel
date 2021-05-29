@@ -8,6 +8,7 @@ pkg_tar(
         ":resources",
         ":web_resources",
         "//web:web",
+        "//db:gendb",
     ],
     package_file_name = "stacuist.com.tar",
 )
