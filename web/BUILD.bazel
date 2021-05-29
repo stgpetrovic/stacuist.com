@@ -1,9 +1,9 @@
 package(default_visibility = ["//visibility:public"])
 
-cc_binary(
-    name = "web",
+cc_library(
+    name = "app",
     srcs = ["app.cc"],
-    linkstatic = True,
+    hdrs = ["app.h"],
     deps = [
         ":query",
         ":recipe_view",
@@ -20,6 +20,7 @@ cc_binary(
         "@com_google_absl//absl/status:statusor",
     ],
 )
+
 
 cc_library(
     name = "recipe_view",

@@ -1,3 +1,5 @@
+#include "web/app.h"
+
 #include <Wt/Dbo/Dbo.h>
 #include <Wt/Dbo/backend/Sqlite3.h>
 #include <Wt/WApplication.h>
@@ -10,8 +12,6 @@
 #include <Wt/WVBoxLayout.h>
 
 #include "absl/algorithm/container.h"
-#include "absl/flags/flag.h"
-#include "absl/flags/parse.h"
 #include "absl/strings/match.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
@@ -23,60 +23,7 @@
 #include "web/recipe_view.h"
 #include "web/tags.h"
 
-ABSL_FLAG(std::string, db_path, "recipes.db", "path to the sqlite3 database");
-
 namespace stacuist::web {
-
-namespace {
-constexpr absl::string_view kRecipe = "/recipe/";
-}  // namespace
-
-class StaCuIstApplication : public Wt::WApplication {
- public:
-  StaCuIstApplication(const Wt::WEnvironment &env,
-                      std::unique_ptr<Wt::Dbo::Session> session);
-
- private:
-  void ProcessPath(absl::string_view path);
-  void SetRecipe(const absl::StatusOr<engine::Recipe> &recipe);
-
-  TagsWidget *tags_view_;
-  RecipeView *recipe_view_;
-  std::unique_ptr<Wt::Dbo::Session> session_;
-};
-
-void StaCuIstApplication::SetRecipe(
-    const absl::StatusOr<engine::Recipe> &recipe) {
-  if (!recipe.ok()) {
-    recipe_view_->SetError(std::string(recipe.status().message()));
-    return;
-  }
-  recipe_view_->SetRecipe(*recipe);
-  setInternalPath(absl::StrCat(kRecipe, recipe->id));
-}
-
-void StaCuIstApplication::ProcessPath(absl::string_view path) {
-  if (!absl::StartsWith(path, kRecipe)) {
-    return;
-  }
-
-  absl::string_view p(path);
-  absl::ConsumePrefix(&p, kRecipe);
-  int32_t recipe_id;
-  if (!absl::SimpleAtoi(p, &recipe_id)) {
-    SetRecipe(GetRecipe({}, session_.get()));
-    return;
-  }
-
-  Wt::Dbo::Transaction transaction{*session_};
-  Wt::Dbo::ptr<engine::Recipe> recipe =
-      session_->find<engine::Recipe>().where("id = ?").bind(recipe_id);
-  if (!recipe) {
-    recipe_view_->SetError(absl::StrCat("unknown recipe id: ", recipe_id));
-    return;
-  }
-  SetRecipe(*recipe);
-}
 
 StaCuIstApplication::StaCuIstApplication(
     const Wt::WEnvironment &env, std::unique_ptr<Wt::Dbo::Session> session)
@@ -125,34 +72,18 @@ StaCuIstApplication::StaCuIstApplication(
 
   recipe_view_ = fit->addWidget(std::make_unique<RecipeView>());
 
-  // Reconstruct the state from URL.
-  if (internalPath() != "/") {
-    ProcessPath(internalPath());
-  } else {
-    SetRecipe(GetRecipe({}, session_.get()));
-  }
+  SetRecipe(GetRecipe({}, session_.get()));
 
   root()->addWidget(std::move(c));
 }
 
-};  // namespace stacuist::web
-
-int main(int argc, char **argv) {
-  absl::ParseCommandLine(argc, argv);
-
-  return Wt::WRun(argc, argv, [](const Wt::WEnvironment &env) {
-    std::cout << "Connecting to sqlite3 db: " << absl::GetFlag(FLAGS_db_path)
-              << std::endl;
-    std::unique_ptr<Wt::Dbo::backend::Sqlite3> sqlite3{
-        new Wt::Dbo::backend::Sqlite3(absl::GetFlag(FLAGS_db_path))};
-    auto session = std::make_unique<Wt::Dbo::Session>();
-    session->setConnection(std::move(sqlite3));
-
-    session->mapClass<stacuist::engine::Tag>("tag");
-    session->mapClass<stacuist::engine::Recipe>("recipe");
-
-    return std::make_unique<stacuist::web::StaCuIstApplication>(
-        env, std::move(session));
-  });
+void StaCuIstApplication::SetRecipe(
+    const absl::StatusOr<engine::Recipe> &recipe) {
+  if (!recipe.ok()) {
+    recipe_view_->SetError(std::string(recipe.status().message()));
+    return;
+  }
+  recipe_view_->SetRecipe(*recipe);
 }
 
+};  // namespace stacuist::web

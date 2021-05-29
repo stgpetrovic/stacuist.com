@@ -2,12 +2,21 @@ load("@rules_pkg//:pkg.bzl", "pkg_deb", "pkg_tar")
 
 package(default_visibility = ["//visibility:public"])
 
+cc_binary(
+    name = "main",
+    srcs = ["main.cc"],
+    deps = [
+        "//web:app",
+        "@system//:system",
+    ],
+)
+
 pkg_tar(
     name = "stacuist_webapp",
     srcs = [
         ":resources",
         ":web_resources",
-        "//web:web",
+        ":main",
         "//db:gendb",
     ],
     package_file_name = "stacuist.com.tar",

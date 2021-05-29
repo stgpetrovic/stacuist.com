@@ -1,4 +1,3 @@
-
 #include "web/query.h"
 
 #include <Wt/Dbo/Session.h>
