@@ -23,7 +23,7 @@
 #include "web/recipe_view.h"
 #include "web/tags.h"
 
-ABSL_FLAG(std::string, db_path, "", "path to the sqlite3 database");
+ABSL_FLAG(std::string, db_path, "recipes.db", "path to the sqlite3 database");
 
 namespace stacuist::web {
 
@@ -141,6 +141,8 @@ int main(int argc, char **argv) {
   absl::ParseCommandLine(argc, argv);
 
   return Wt::WRun(argc, argv, [](const Wt::WEnvironment &env) {
+    std::cout << "Connecting to sqlite3 db: " << absl::GetFlag(FLAGS_db_path)
+              << std::endl;
     std::unique_ptr<Wt::Dbo::backend::Sqlite3> sqlite3{
         new Wt::Dbo::backend::Sqlite3(absl::GetFlag(FLAGS_db_path))};
     auto session = std::make_unique<Wt::Dbo::Session>();

@@ -11,16 +11,14 @@ def ParseRecipes():
     recipes = []
     r = runfiles.Create()
 
-    for fn in os.listdir(r.Rlocation("stacuist/db/recipes")):
+    root = r.Rlocation("stacuist/db/recipes")
+    for fn in os.listdir(root):
         ingredients = []
         text = []
         tags = []
         name = ""
         phase = None
-        path = r.Rlocation("stacuist/db/recipes/recipes/"+fn)
-        if not path:
-            continue
-        for l in open(path).read().splitlines():
+        for l in open(os.path.join(root,fn)).read().splitlines():
             if l == "Name:":
                 phase = 0
                 continue
