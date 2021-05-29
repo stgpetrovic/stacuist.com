@@ -15,7 +15,10 @@ filegroup(
 py_binary(
     name = "recipes_to_sql",
     srcs = ["recipes_to_sql.py"],
-    data = [":db", ":recipes"],
+    data = [
+        ":db",
+        ":recipes"
+    ],
     python_version = "PY3",
     deps = ["@rules_python//python/runfiles"],
 )
