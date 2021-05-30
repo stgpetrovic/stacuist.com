@@ -56,6 +56,11 @@ void RecipeView::SetRecipe(const engine::Recipe& recipe) {
   ingredients_->clear();
   for (const auto& ingredient : recipe_.GetIngredients()) {
     auto cb = ingredients_->addNew<Wt::WCheckBox>(Wt::WString(ingredient));
+    if (absl::EndsWith(ingredient, ":")) {
+      cb->setEnabled(false);
+      cb->setStyleClass("btn");
+      cb->setStyleClass("btn-info");
+    }
     cb->setInline(false);
     cb->setChecked(false);
   }
