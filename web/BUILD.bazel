@@ -9,7 +9,7 @@ cc_library(
         ":recipe_view",
         ":tags",
         "//engine:recipe",
-        "@system//:system",
+        "@system//:wt",
         "@boost//:thread",
         "@boost//:system",
         "@com_google_absl//absl/strings",
@@ -27,7 +27,7 @@ cc_library(
     srcs = ["recipe_view.cc"],
     hdrs = ["recipe_view.h"],
     deps = [
-        "@system//:system",
+        "@system//:wt",
         "//engine:recipe",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/random",
@@ -39,7 +39,7 @@ cc_library(
     srcs = ["tags.cc"],
     hdrs = ["tags.h"],
     deps = [
-        "@system//:system",
+        "@system//:wt",
         "//engine:recipe",
         "@com_google_absl//absl/types:span",
     ],
@@ -50,7 +50,7 @@ cc_library(
     srcs = ["query.cc"],
     hdrs = ["query.h"],
     deps = [
-        "@system//:system",
+        "@system//:wt",
         "//engine:recipe",
     ],
 )

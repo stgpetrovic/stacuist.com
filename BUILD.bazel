@@ -7,9 +7,21 @@ cc_binary(
     srcs = ["main.cc"],
     deps = [
         "//web:app",
-        "@system//:system",
+        "@system//:wt",
+        "@system//:wtfcgi",
     ],
 )
+
+cc_binary(
+    name = "main_dev",
+    srcs = ["main.cc"],
+    deps = [
+        "//web:app",
+        "@system//:wt",
+        "@system//:wthttpd",
+    ],
+)
+
 
 pkg_tar(
     name = "stacuist_webapp",
