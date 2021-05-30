@@ -42,6 +42,8 @@ cc_library(
         "@system//:wt",
         "//engine:recipe",
         "@com_google_absl//absl/types:span",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/synchronization",
     ],
 )
 
