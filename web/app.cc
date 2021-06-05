@@ -25,6 +25,10 @@
 
 namespace stacuist::web {
 
+namespace {
+constexpr absl::string_view kRecipe = "/recipe/";
+}  // namespace
+
 StaCuIstApplication::StaCuIstApplication(
     const Wt::WEnvironment &env, std::unique_ptr<Wt::Dbo::Session> session)
     : Wt::WApplication(env), session_(std::move(session)) {
@@ -75,9 +79,36 @@ StaCuIstApplication::StaCuIstApplication(
 
   recipe_view_ = fit->addWidget(std::make_unique<RecipeView>());
 
-  SetRecipe(GetRecipe({}, session_.get()));
+  if (internalPath() != "/") {
+    ProcessPath(internalPath());
+  } else {
+    SetRecipe(GetRecipe({}, session_.get()));
+  }
 
   root()->addWidget(std::move(c));
+}
+
+void StaCuIstApplication::ProcessPath(absl::string_view path) {
+  if (!absl::StartsWith(path, kRecipe)) {
+    return;
+  }
+
+  absl::string_view p(path);
+  absl::ConsumePrefix(&p, kRecipe);
+  int32_t recipe_id;
+  if (!absl::SimpleAtoi(p, &recipe_id)) {
+    SetRecipe(GetRecipe({}, session_.get()));
+    return;
+  }
+
+  Wt::Dbo::Transaction transaction{*session_};
+  Wt::Dbo::ptr<engine::Recipe> recipe =
+      session_->find<engine::Recipe>().where("id = ?").bind(recipe_id);
+  if (!recipe) {
+    recipe_view_->SetError(absl::StrCat("unknown recipe id: ", recipe_id));
+    return;
+  }
+  SetRecipe(*recipe);
 }
 
 void StaCuIstApplication::SetRecipe(
