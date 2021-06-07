@@ -48,15 +48,15 @@ def ToSql(recipes):
     sql = []
 
     tags = {}
-    for recipe in recipes:
-        for tag in recipe.tags:
+    for recipe in sorted(recipes):
+        for tag in sorted(recipe.tags):
             if tag not in tags:
                 tags[tag] = len(tags)
 
     for tag, key in tags.items():
         sql.append('insert into tag values(%d, 0, "%s")' % (key, tag))
 
-    for key, recipe in enumerate(recipes):
+    for key, recipe in enumerate(sorted(recipes)):
         sql.append('insert into recipe values(%d, 0, "%s", "slon", "%s", "%s")' % (key, recipe.name, '\n'.join(recipe.text), '|'.join(recipe.ingredients)))
         for tag in recipe.tags:
             sql.append('insert into recipe_tags values(%s, %d)' % (key, tags[tag]))
