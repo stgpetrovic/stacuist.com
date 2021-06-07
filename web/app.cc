@@ -95,17 +95,13 @@ void StaCuIstApplication::ProcessPath(absl::string_view path) {
 
   absl::string_view p(path);
   absl::ConsumePrefix(&p, kRecipe);
-  int32_t recipe_id;
-  if (!absl::SimpleAtoi(p, &recipe_id)) {
-    SetRecipe(GetRecipe({}, session_.get()));
-    return;
-  }
 
   Wt::Dbo::Transaction transaction{*session_};
   Wt::Dbo::ptr<engine::Recipe> recipe =
-      session_->find<engine::Recipe>().where("id = ?").bind(recipe_id);
+      session_->find<engine::Recipe>().where("name = ?").bind(std::string(p));
   if (!recipe) {
-    recipe_view_->SetError(absl::StrCat("unknown recipe id: ", recipe_id));
+    recipe_view_->SetError(
+        absl::StrCat("nema ti te ricete odi, odi na gugl i trazi tamo ", p));
     return;
   }
   SetRecipe(*recipe);
