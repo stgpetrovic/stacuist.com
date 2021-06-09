@@ -30,6 +30,7 @@ pkg_tar(
         ":web_resources",
         ":main",
         "//db:gendb",
+        ":run.sh",
     ],
     package_file_name = "stacuist.com.tar",
 )
