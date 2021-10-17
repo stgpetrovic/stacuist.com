@@ -54,5 +54,7 @@ cc_library(
     deps = [
         "@system//:wt",
         "//engine:recipe",
+        "@com_google_absl//absl/status:status",
+        "@com_google_absl//absl/status:statusor",
     ],
 )
