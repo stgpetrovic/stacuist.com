@@ -6,6 +6,7 @@
 #include <Wt/WBootstrapTheme.h>
 #include <Wt/WBreak.h>
 #include <Wt/WContainerWidget.h>
+#include <Wt/WEnvironment.h>
 #include <Wt/WLineEdit.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WText.h>
@@ -26,7 +27,7 @@
 namespace stacuist::web {
 
 namespace {
-constexpr absl::string_view kRecipe = "/recipe/";
+constexpr absl::string_view kSearchPath = "/search/";
 }  // namespace
 
 StaCuIstApplication::StaCuIstApplication(
@@ -41,6 +42,18 @@ StaCuIstApplication::StaCuIstApplication(
       "<h1>Šta ću ist?! <a "
       "href='https://github.com/stgpetrovic/stacuist.com' "
       "target='_blank' class='btn btn-primary'>github</a></h1>");
+
+  // Search bar.
+  auto q = fit->addWidget(std::make_unique<Wt::WLineEdit>());
+  q->setFocus();
+  auto search = fit->addWidget(std::make_unique<Wt::WPushButton>("Search"));
+  search->clicked().connect([this, q] {
+    const auto query = q->text().toUTF8();
+    setInternalPath(absl::StrCat(kSearchPath, query));
+    ProcessPath(query);
+  });
+  search->setMargin(5, Wt::Side::Left);
+  fit->addWidget(std::make_unique<Wt::WBreak>());
 
   // Set the theme.
   auto theme = std::make_shared<Wt::WBootstrapTheme>();
@@ -89,17 +102,17 @@ StaCuIstApplication::StaCuIstApplication(
 }
 
 void StaCuIstApplication::ProcessPath(absl::string_view path) {
-  if (!absl::StartsWith(path, kRecipe)) {
-    return;
-  }
-
   absl::string_view p(path);
-  absl::ConsumePrefix(&p, kRecipe);
+  absl::ConsumePrefix(&p, kSearchPath);
 
   Wt::Dbo::Transaction transaction{*session_};
-  Wt::Dbo::ptr<engine::Recipe> recipe =
-      session_->find<engine::Recipe>().where("name = ?").bind(std::string(p));
+  Wt::Dbo::ptr<engine::Recipe> recipe = session_->find<engine::Recipe>()
+                                            .where("name like ?")
+                                            .bind(absl::StrCat("%", p, "%"));
+  std::cout << "\t\tQuery: " << path << std::endl;
   if (!recipe) {
+    engine::Recipe empty;
+    SetRecipe(empty);
     recipe_view_->SetError(
         absl::StrCat("nema ti te ricete odi, odi na gugl i trazi tamo ", p));
     return;
