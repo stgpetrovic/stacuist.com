@@ -7,6 +7,7 @@
 #include <Wt/WBreak.h>
 #include <Wt/WContainerWidget.h>
 #include <Wt/WEnvironment.h>
+#include <Wt/WEvent.h>
 #include <Wt/WLineEdit.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WText.h>
@@ -46,12 +47,18 @@ StaCuIstApplication::StaCuIstApplication(
   // Search bar.
   auto q = fit->addWidget(std::make_unique<Wt::WLineEdit>());
   q->setFocus();
-  auto search = fit->addWidget(std::make_unique<Wt::WPushButton>("Search"));
-  search->clicked().connect([this, q] {
+  auto handler = [this, q] {
     const auto query = q->text().toUTF8();
     setInternalPath(absl::StrCat(kSearchPath, query));
     ProcessPath(query);
+  };
+  q->keyPressed().connect([handler](Wt::WKeyEvent e) {
+    if (e.key() == Wt::Key::Enter) {
+      handler();
+    }
   });
+  auto search = fit->addWidget(std::make_unique<Wt::WPushButton>("Search"));
+  search->clicked().connect(handler);
   search->setMargin(5, Wt::Side::Left);
   fit->addWidget(std::make_unique<Wt::WBreak>());
 
