@@ -1,27 +1,48 @@
 #[macro_use]
 extern crate rocket;
 
+use indexmap::IndexMap;
+use rand;
+use rand::Rng;
+use rocket::response::Redirect;
 use rocket::State;
-use std::collections::HashMap;
 use std::fs;
 
 mod recipe;
+mod template;
 
 struct Config {
-    recipes: HashMap<String, recipe::Recipe>,
+    recipes: IndexMap<String, recipe::Recipe>,
 }
 
 #[get("/recipe/<name>")]
-fn index(name: &str, config: &State<Config>) -> String {
-    if !config.recipes.contains_key(name) {
-        return format!("Nima ricete: {}!", name);
-    }
-    return format!("Riceta: {:?}", config.recipes.get(name));
+fn recipe_name(name: &str, config: &State<Config>) -> String {
+    return template::make_template(config.recipes.get(name));
+}
+
+#[get("/random")]
+fn random(config: &State<Config>) -> String {
+    let mut rng = rand::thread_rng();
+    return template::make_template(
+        match config.recipes.get_index(
+            (rng.gen::<usize>() % config.recipes.len() - 1)
+                .try_into()
+                .unwrap(),
+        ) {
+            Some(x) => Some(x.1),
+            None => panic!("bug in random lookup"),
+        },
+    );
+}
+
+#[get("/")]
+fn default() -> Redirect {
+    return Redirect::to(uri!(random()));
 }
 
 fn config() -> Config {
     let paths = fs::read_dir("../db/recipes").unwrap();
-    let mut r = HashMap::new();
+    let mut r = IndexMap::new();
 
     for path in paths {
         let p = path.unwrap().path();
@@ -38,7 +59,7 @@ fn config() -> Config {
 async fn main() -> Result<(), rocket::Error> {
     rocket::build()
         .manage(config())
-        .mount("/", routes![index])
+        .mount("/", routes![recipe_name, random, default])
         .ignite()
         .await?
         .launch()
