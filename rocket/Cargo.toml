@@ -6,6 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket = "0.5.0-rc.1"
+rocket = "0.4.10"
 indexmap = "1.8.0"
 rand = "0.8.4"
+log = "0.4"
+
+[dependencies.rocket_contrib]
+version = "0.4.10"
+default-features = false
+features = ["handlebars_templates", "serve"]

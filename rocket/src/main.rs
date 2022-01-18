@@ -1,11 +1,16 @@
+#![feature(proc_macro_hygiene, decl_macro)]
+
 #[macro_use]
 extern crate rocket;
 
 use indexmap::IndexMap;
+use log::info;
 use rand;
 use rand::Rng;
 use rocket::response::Redirect;
 use rocket::State;
+use rocket_contrib::serve::StaticFiles;
+use rocket_contrib::templates::Template;
 use std::fs;
 
 mod recipe;
@@ -16,12 +21,12 @@ struct Config {
 }
 
 #[get("/recipe/<name>")]
-fn recipe_name(name: &str, config: &State<Config>) -> String {
-    return template::make_template(config.recipes.get(name));
+fn recipe_name(name: String, config: State<Config>) -> String {
+    return template::make_template(config.recipes.get(name.as_str()));
 }
 
 #[get("/random")]
-fn random(config: &State<Config>) -> String {
+fn random(config: State<Config>) -> String {
     let mut rng = rand::thread_rng();
     return template::make_template(
         match config.recipes.get_index(
@@ -36,8 +41,8 @@ fn random(config: &State<Config>) -> String {
 }
 
 #[get("/")]
-fn default() -> Redirect {
-    return Redirect::to(uri!(random()));
+fn default(config: State<Config>) -> Redirect {
+    return Redirect::to(uri!(random));
 }
 
 fn config() -> Config {
@@ -55,13 +60,11 @@ fn config() -> Config {
     return Config { recipes: r };
 }
 
-#[rocket::main]
-async fn main() -> Result<(), rocket::Error> {
-    rocket::build()
+fn main() {
+    rocket::ignite()
         .manage(config())
+        .mount("/static", StaticFiles::from("static"))
         .mount("/", routes![recipe_name, random, default])
-        .ignite()
-        .await?
-        .launch()
-        .await
+        .attach(Template::fairing())
+        .launch();
 }
