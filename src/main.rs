@@ -45,7 +45,7 @@ fn default() -> Redirect {
 }
 
 fn config() -> Config {
-    let paths = fs::read_dir("../db/recipes").unwrap();
+    let paths = fs::read_dir("recipes").unwrap();
     let mut r = IndexMap::new();
 
     for path in paths {
