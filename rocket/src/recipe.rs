@@ -1,4 +1,6 @@
-#[derive(Debug)]
+use serde::Serialize;
+
+#[derive(Debug, Serialize)]
 pub struct Recipe {
     pub name: String,
     pub ingredients: Vec<String>,

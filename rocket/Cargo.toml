@@ -15,3 +15,7 @@ log = "0.4"
 version = "0.4.10"
 default-features = false
 features = ["handlebars_templates", "serve"]
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]

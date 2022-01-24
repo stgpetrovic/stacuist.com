@@ -14,34 +14,33 @@ use rocket_contrib::templates::Template;
 use std::fs;
 
 mod recipe;
-mod template;
 
 struct Config {
     recipes: IndexMap<String, recipe::Recipe>,
 }
 
 #[get("/recipe/<name>")]
-fn recipe_name(name: String, config: State<Config>) -> String {
-    return template::make_template(config.recipes.get(name.as_str()));
+fn recipe_name(name: String, config: State<Config>) -> Template {
+    let context = config.recipes.get(name.as_str());
+    return Template::render("recipe", &context);
 }
 
 #[get("/random")]
-fn random(config: State<Config>) -> String {
+fn random(config: State<Config>) -> Template {
     let mut rng = rand::thread_rng();
-    return template::make_template(
-        match config.recipes.get_index(
-            (rng.gen::<usize>() % config.recipes.len() - 1)
-                .try_into()
-                .unwrap(),
-        ) {
-            Some(x) => Some(x.1),
-            None => panic!("bug in random lookup"),
-        },
-    );
+    let context = match config.recipes.get_index(
+        (rng.gen::<usize>() % config.recipes.len() - 1)
+            .try_into()
+            .unwrap(),
+    ) {
+        Some(x) => Some(x.1),
+        None => panic!("bug in random lookup"),
+    };
+    return Template::render("recipe", &context);
 }
 
 #[get("/")]
-fn default(config: State<Config>) -> Redirect {
+fn default() -> Redirect {
     return Redirect::to(uri!(random));
 }
 
