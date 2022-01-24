@@ -29,7 +29,7 @@ fn recipe_name(name: String, config: State<Config>) -> Template {
 fn random(config: State<Config>) -> Template {
     let mut rng = rand::thread_rng();
     let context = match config.recipes.get_index(
-        (rng.gen::<usize>() % config.recipes.len() - 1)
+        (rng.gen::<usize>() % config.recipes.len())
             .try_into()
             .unwrap(),
     ) {
