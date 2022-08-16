@@ -1,5 +1,3 @@
-#![feature(proc_macro_hygiene, decl_macro)]
-
 #[macro_use]
 extern crate rocket;
 
@@ -9,8 +7,7 @@ use rand;
 use rand::Rng;
 use rocket::response::Redirect;
 use rocket::State;
-use rocket_contrib::serve::StaticFiles;
-use rocket_contrib::templates::Template;
+use rocket_dyn_templates::Template;
 use std::fs;
 
 mod recipe;
@@ -20,13 +17,13 @@ struct Config {
 }
 
 #[get("/recipe/<name>")]
-fn recipe_name(name: String, config: State<Config>) -> Template {
+fn recipe_name(name: String, config: &State<Config>) -> Template {
     let context = config.recipes.get(name.as_str());
     return Template::render("recipe", &context);
 }
 
 #[get("/random")]
-fn random(config: State<Config>) -> Template {
+fn random(config: &State<Config>) -> Template {
     let mut rng = rand::thread_rng();
     let context = match config.recipes.get_index(
         (rng.gen::<usize>() % config.recipes.len())
@@ -59,11 +56,11 @@ fn config() -> Config {
     return Config { recipes: r };
 }
 
-fn main() {
-    rocket::ignite()
+#[launch]
+fn rocket() -> _ {
+    rocket::build()
         .manage(config())
-        .mount("/static", StaticFiles::from("static"))
+        //.mount("/static", FileServer::from("static"))
         .mount("/", routes![recipe_name, random, default])
         .attach(Template::fairing())
-        .launch();
 }

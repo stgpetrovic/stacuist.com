@@ -44,6 +44,6 @@ pub fn build_recipe(contents: String) -> Recipe {
     return Recipe {
         name: name.to_string(),
         ingredients: ingredients,
-        text: text.join("\n"),
+        text: text.join("\n\n"),
     };
 }
