@@ -29,15 +29,21 @@ async fn post_search(todo_form: Form<recipe::Query>) -> Redirect {
     Redirect::to(format!("/search/{}", query.q))
 }
 
+fn normalize_name(name: &str) -> String {
+    return name
+        .to_lowercase()
+        .replace("č", "c")
+        .replace("ć", "c")
+        .replace("š", "s")
+        .replace("ž", "z")
+        .to_owned();
+}
+
 #[get("/search/<name>")]
 fn search_recipe(name: &str, config: &State<Config>) -> Template {
     let mut matches = Vec::new();
     for recipe in config.recipes.values() {
-        if recipe
-            .name
-            .to_lowercase()
-            .contains(name.to_lowercase().as_str())
-        {
+        if normalize_name(recipe.name.as_str()).contains(&normalize_name(name)) {
             matches.push(recipe);
         }
     }
