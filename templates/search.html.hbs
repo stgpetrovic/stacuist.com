@@ -10,26 +10,15 @@
       <a class="btn btn-primary" href="https://github.com/stgpetrovic/stacuist.com" role="button" target="_blank">github</a>
     </div>
     <div style="text-align: center">
-      <form action="/post_search" method="post">
-        <input type="text" class="form-control" name="q" id="q" placeholder="sarma"></input>
-        <button type="submit" class="btn btn-primary">Ajde nađi</button>
-      </search>
-      <a class="btn btn-primary" href="/random" role="button">Daj nešto drugo</a>
+      <a class="btn btn-primary" href="/random" role="button">Daj nešto random</a>
     </div>
-    <h3>{{name}}</h3>
-    <br>
-    {{#each ingredients}}
-      <div style="margin: 5px;">
-        <input class="form-check-input" type="checkbox" id="{{this}}" name="{{this}}">
-        <label for="{{this}}">{{this}}</label>
-      </div>
+    <ul>
+    {{#each matches}}
+      <li><a href="/recipe/{{this.url_hook}}">{{this.name}}</a></li>
+    {{else}}
+      <p class="empty">Je si fensi, neman ja to.</p>
     {{/each}}
-
-  <br/>
-  <div>
-    <pre style='font-family: var(--bs-body-font-family); margin:5px; white-space: pre-wrap;'>{{text}}</pre>
-  </div>
-
+    </ul>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
   </body>
 </html>

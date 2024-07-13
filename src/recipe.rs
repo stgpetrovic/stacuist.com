@@ -5,6 +5,18 @@ pub struct Recipe {
     pub name: String,
     pub ingredients: Vec<String>,
     pub text: String,
+    pub url_hook: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct Results<'a> {
+    pub query: &'a str,
+    pub matches: Vec<&'a Recipe>,
+}
+
+#[derive(Debug, FromForm)]
+pub struct Query {
+    pub q: String,
 }
 
 pub fn build_recipe(contents: String) -> Recipe {
@@ -43,7 +55,8 @@ pub fn build_recipe(contents: String) -> Recipe {
 
     return Recipe {
         name: name.to_string(),
-        ingredients: ingredients,
+        ingredients,
         text: text.join("\n\n"),
+        url_hook: name.to_string().to_lowercase(),
     };
 }
