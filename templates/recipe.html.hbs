@@ -1,35 +1,87 @@
 <!doctype html>
 <html lang="en">
-  <head>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  </head>
-  <body>
-    <div style="text-align: center">
-      <h1 style="display: inline-block">Šta ću ist?!</h1>
-      <a class="btn btn-primary" href="https://github.com/stgpetrovic/stacuist.com" role="button" target="_blank">github</a>
-    </div>
-    <div style="text-align: center">
-      <form action="/post_search" method="post">
-        <input type="text" class="form-control" name="q" id="q" placeholder="sarma"></input>
-        <button type="submit" class="btn btn-primary">Ajde nađi</button>
-      </search>
-      <a class="btn btn-primary" href="/random" role="button">Daj nešto drugo</a>
-    </div>
-    <h3>{{name}}</h3>
-    <br>
-    {{#each ingredients}}
-      <div style="margin: 5px;">
-        <input class="form-check-input" type="checkbox" id="{{this}}" name="{{this}}">
-        <label for="{{this}}">{{this}}</label>
-      </div>
-    {{/each}}
 
-  <br/>
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+  <div style="text-align: center">
+    <h1 style="display: inline-block">Šta ću ist?!</h1>
+    <a class="btn btn-primary" href="https://github.com/stgpetrovic/stacuist.com" role="button"
+      target="_blank">github</a>
+  </div>
+  <div style="text-align: center">
+    <form action="/post_search" method="post" style="display: inline-block;">
+      <input type="text" class="form-control d-inline-block w-auto" name="q" id="q" placeholder="sarma"></input>
+      <button type="submit" class="btn btn-primary">Ajde nađi</button>
+    </form>
+    <a class="btn btn-primary" href="/random" role="button">Daj nešto drugo</a>
+  </div>
+
+  <div class="d-flex justify-content-center mt-3 mb-2 d-lg-none">
+    <div class="form-check form-switch" id="wakeLockContainer">
+      <input class="form-check-input" type="checkbox" id="wakeLockCheckbox">
+      <label class="form-check-label" for="wakeLockCheckbox">Nemoj gasit ekran 🍳</label>
+    </div>
+  </div>
+  <h3>{{name}}</h3>
+  <br>
+  {{#each ingredients}}
+  <div style="margin: 5px;">
+    <input class="form-check-input" type="checkbox" id="{{this}}" name="{{this}}">
+    <label for="{{this}}">{{this}}</label>
+  </div>
+  {{/each}}
+
+  <br />
   <div>
     <pre style='font-family: var(--bs-body-font-family); margin:5px; white-space: pre-wrap;'>{{text}}</pre>
   </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+    crossorigin="anonymous"></script>
+  <script>
+    let wakeLock = null;
+    const wakeLockCheckbox = document.getElementById('wakeLockCheckbox');
+    const wakeLockContainer = document.getElementById('wakeLockContainer');
+
+    if (!('wakeLock' in navigator)) {
+      wakeLockContainer.style.display = 'none';
+    }
+
+    const requestWakeLock = async () => {
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Wake Lock is active');
+      } catch (err) {
+        console.error(`${err.name}, ${err.message}`);
+        wakeLockCheckbox.checked = false;
+      }
+    };
+
+    const handleVisibilityChange = async () => {
+      if (wakeLock !== null && document.visibilityState === 'visible' && wakeLockCheckbox.checked) {
+        await requestWakeLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    wakeLockCheckbox.addEventListener('change', async () => {
+      if (wakeLockCheckbox.checked) {
+        await requestWakeLock();
+      } else {
+        if (wakeLock !== null) {
+          await wakeLock.release();
+          wakeLock = null;
+        }
+      }
+    });
+  </script>
+</body>
+
 </html>
